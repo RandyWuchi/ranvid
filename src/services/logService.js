@@ -14,7 +14,7 @@ const init = () => {
 };
 
 const log = (error) => {
-  Sentry.captureMessage(error);
+  Sentry.captureException(error);
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export
