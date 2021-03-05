@@ -8,6 +8,8 @@ import { paginate } from "../utils/paginate";
 import Pagination from "../common/pagination";
 import ListGroup from "../common/listGroup";
 import MoviesTable from "./moviesTable";
+import Button from "../common/button";
+import SearchBox from "../common/searchBox";
 
 const Movies = () => {
   const [movies, setMovies] = useState(getMovies());
@@ -19,6 +21,7 @@ const Movies = () => {
   const [pageSize, setPageSize] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState({ path: "title", order: "asc" });
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleDelete = (movie) => {
     const newMovies = movies.filter((m) => m._id !== movie._id);
@@ -40,17 +43,30 @@ const Movies = () => {
   const handleGenreSelect = (genre) => {
     setSelectedGenre(genre);
     setCurrentPage(1);
+    setSearchQuery("");
   };
 
   const handleSort = (sortColumn) => {
     setSortColumn(sortColumn);
   };
 
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    setSelectedGenre(null);
+    setCurrentPage(1);
+  };
+
   const getPagedData = () => {
-    const filtered =
-      selectedGenre && selectedGenre._id
-        ? movies.filter((m) => m.genre._id === selectedGenre._id)
-        : movies;
+    let filtered = movies;
+    if (searchQuery)
+      filtered = movies.filter((m) =>
+        m.title.toLowerCase().startsWith(searchQuery.toLowerCase())
+      );
+    else
+      filtered =
+        selectedGenre && selectedGenre._id
+          ? movies.filter((m) => m.genre._id === selectedGenre._id)
+          : movies;
 
     const sorted = _.orderBy(filtered, [sortColumn.path], [sortColumn.order]);
 
@@ -75,7 +91,9 @@ const Movies = () => {
         />
       </div>
       <div className="col">
+        <Button path="/movies/new" title="New Movie" />
         <p>Showing {totalCount} movies in the database </p>
+        <SearchBox value={searchQuery} onChange={handleSearch} />
         <MoviesTable
           movies={data}
           sortColumn={sortColumn}
