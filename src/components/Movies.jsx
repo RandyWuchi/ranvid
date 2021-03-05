@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import _ from "lodash";
+import { toast } from "react-toastify";
 
-import { getMovies } from "../services/fakeMovieService";
-import { getGenres } from "../services/fakeGenreService";
+import { getMovies, deleteMovie } from "../services/movieService";
+import { getGenres } from "../services/genreService";
 import { paginate } from "../utils/paginate";
 import Pagination from "../common/pagination";
 import ListGroup from "../common/listGroup";
@@ -12,20 +13,45 @@ import Button from "../common/button";
 import SearchBox from "../common/searchBox";
 
 const Movies = () => {
-  const [movies, setMovies] = useState(getMovies());
-  const [genres, setGenres] = useState([
-    { _id: "", name: "All Genre" },
-    ...getGenres(),
-  ]);
-  const [selectedGenre, setSelectedGenre] = useState(genres[0]);
+  const [movies, setMovies] = useState([]);
+  const [genres, setGenres] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState(null);
   const [pageSize, setPageSize] = useState(4);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortColumn, setSortColumn] = useState({ path: "title", order: "asc" });
   const [searchQuery, setSearchQuery] = useState("");
 
-  const handleDelete = (movie) => {
-    const newMovies = movies.filter((m) => m._id !== movie._id);
+  const populateGenre = async () => {
+    const { data } = await getGenres();
+    const genres = [{ _id: "", name: "All Genre" }, ...data];
+    setGenres(genres);
+    setSelectedGenre(genres[0]);
+  };
+
+  const populateMovie = async () => {
+    const { data: movies } = await getMovies();
+    setMovies(movies);
+  };
+
+  useEffect(() => {
+    populateGenre();
+    populateMovie();
+  }, []);
+
+  const handleDelete = async (movie) => {
+    const originalMovies = movies;
+
+    const newMovies = originalMovies.filter((m) => m._id !== movie._id);
     setMovies(newMovies);
+
+    try {
+      await deleteMovie(movie._id);
+    } catch (ex) {
+      if (ex.response && ex.response.status === 404)
+        toast.error("This movie has already been deleted");
+
+      setMovies(originalMovies);
+    }
   };
 
   const handleLike = (movie) => {

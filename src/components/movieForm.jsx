@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Form, FormInput, FormSelect, SubmitButton } from "../common/Form";
 import * as Yup from "yup";
-import { getGenres } from "../services/fakeGenreService";
-import { getMovie, saveMovie } from "../services/fakeMovieService";
+import { getGenres } from "../services/genreService";
+import { getMovie, saveMovie } from "../services/movieService";
 
 const MovieForm = ({ history, match }) => {
   const [genres, setGenres] = useState([]);
@@ -14,18 +14,31 @@ const MovieForm = ({ history, match }) => {
     dailyRentalRate: "",
   });
 
-  useEffect(() => {
-    const genres = getGenres();
+  const populateGenres = async () => {
+    const { data: genres } = await getGenres();
     setGenres(genres);
+  };
 
-    const movieId = match.params.id;
-    if (movieId === "new") return;
+  const populateMovie = async () => {
+    try {
+      const movieId = match.params.id;
+      if (movieId === "new") return;
 
-    const movie = getMovie(movieId);
-    if (!movie) return history.replace("/not-found");
+      const { data: movie } = await getMovie(movieId);
 
-    setInitialValues(mapToViewModel(movie));
-  }, [match.params.id, history]);
+      setInitialValues(mapToViewModel(movie));
+    } catch (ex) {
+      if (ex.response && ex.response.status === 404)
+        history.replace("/not-found");
+    }
+  };
+
+  useEffect(() => {
+    populateGenres();
+
+    populateMovie();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const mapToViewModel = (movie) => {
     return {
@@ -45,9 +58,9 @@ const MovieForm = ({ history, match }) => {
     dailyRentalRate: Yup.number().min(0).max(10).required().label("Rate"),
   });
 
-  const handleSubmit = (values) => {
+  const handleSubmit = async (values) => {
     // Call server
-    saveMovie(values);
+    await saveMovie(values);
 
     // Redirect to movies
     history.push("/movies");
