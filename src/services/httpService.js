@@ -1,6 +1,5 @@
 import axios from "axios";
 import logger from "./logService";
-// import auth from "./authService";
 import { toast } from "react-toastify";
 
 // axios.defaults.baseURL = process.env.REACT_APP_API_URL;
@@ -19,9 +18,9 @@ axios.interceptors.response.use(null, (error) => {
   return Promise.reject(error);
 });
 
-// export function setJWT(jwt) {
-//   axios.defaults.headers.common["x-auth-token"] = auth.getJWT(jwt);
-// }
+const setJWT = (jwt) => {
+  axios.defaults.headers.common["x-auth-token"] = jwt;
+};
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -29,5 +28,5 @@ export default {
   post: axios.post,
   put: axios.put,
   delete: axios.delete,
-  //setJWT
+  setJWT,
 };

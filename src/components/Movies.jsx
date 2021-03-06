@@ -12,7 +12,7 @@ import MoviesTable from "./moviesTable";
 import Button from "../common/button";
 import SearchBox from "../common/searchBox";
 
-const Movies = () => {
+const Movies = ({ user }) => {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
   const [selectedGenre, setSelectedGenre] = useState(null);
@@ -117,7 +117,7 @@ const Movies = () => {
         />
       </div>
       <div className="col">
-        <Button path="/movies/new" title="New Movie" />
+        {user && <Button path="/movies/new" title="New Movie" />}
         <p>Showing {totalCount} movies in the database </p>
         <SearchBox value={searchQuery} onChange={handleSearch} />
         <MoviesTable
