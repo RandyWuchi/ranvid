@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 import Like from "../common/like";
 import Table from "../common/table";
-import { getCurrentUser } from "../services/authService";
 
 const MoviesTable = ({ movies, onLike, onDelete, sortColumn, onSort }) => {
   const columns = [
@@ -23,28 +22,18 @@ const MoviesTable = ({ movies, onLike, onDelete, sortColumn, onSort }) => {
         <Like liked={movie.liked} onClick={() => onLike(movie)} />
       ),
     },
+    {
+      key: "delete",
+      content: (movie) => (
+        <button
+          onClick={() => onDelete(movie)}
+          className="btn btn-danger btn-sm"
+        >
+          Delete
+        </button>
+      ),
+    },
   ];
-
-  useEffect(() => {
-    showDeleteButton();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const showDeleteButton = () => {
-    const user = getCurrentUser();
-    if (user && user.isAdmin)
-      columns.push({
-        key: "delete",
-        content: (movie) => (
-          <button
-            onClick={() => onDelete(movie)}
-            className="btn btn-danger btn-sm"
-          >
-            Delete
-          </button>
-        ),
-      });
-  };
 
   return (
     <Table

@@ -7,7 +7,6 @@ import { getMovie, saveMovie } from "../services/movieService";
 const MovieForm = ({ history, match }) => {
   const [genres, setGenres] = useState([]);
   const [initialValues, setInitialValues] = useState({
-    _id: "",
     title: "",
     genreId: "",
     numberInStock: "",
